@@ -1,0 +1,31 @@
+create or replace function str_html (line in clob) return clob is 
+    x clob := EMPTY_CLOB; 
+    in_html boolean := FALSE; 
+    s varchar2(1); 
+  begin 
+    --if line is null then 
+    -- return line; 
+    --end if; 
+    --SYS.DBMS_OUTPUT.ENABLE();
+    dbms_lob.createtemporary(x,TRUE); 
+
+    for i in 1 .. dbms_lob.getlength( line ) loop 
+      s := dbms_lob.substr( line, 1, i ); 
+      -- dbms_lob substr's last two params 
+      -- are the other way around!! 
+      if in_html then 
+        if s = '>' then 
+          in_html := FALSE; 
+        end if; 
+      else 
+        if s = '<' then 
+          in_html := TRUE; 
+        end if; 
+      end if; 
+      if not in_html and s != '>' and s is not null then 
+        dbms_lob.writeappend(x,1, s); 
+        
+      end if; 
+    end loop; 
+    return x; 
+  end str_html;
